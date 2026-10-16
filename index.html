@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHING Tools Translate Video .ai</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1020;
+      color: #f8fafc;
+    }
+    header {
+      padding: 22px;
+      text-align: center;
+      border-bottom: 1px solid #28344d;
+      background: #111a2e;
+    }
+    header h1 { margin: 0; color: #65e4ff; font-size: 25px; }
+    header p { color: #a9b7ce; }
+    main { max-width: 850px; margin: 28px auto; padding: 16px; }
+    .panel {
+      background: #141e33;
+      border: 1px solid #2b3b58;
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+    h2 { font-size: 19px; }
+    label { display: block; margin: 15px 0 8px; }
+    input, select, button {
+      width: 100%;
+      padding: 13px;
+      border-radius: 9px;
+      border: 1px solid #364968;
+      font-size: 15px;
+    }
+    input, select {
+      color: white;
+      background: #0b1427;
+    }
+    button {
+      background: #13b9d7;
+      color: #06111c;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    video { width: 100%; margin-top: 15px; border-radius: 10px; }
+    .muted { color: #a9b7ce; font-size: 14px; }
+    .status { color: #65e4ff; overflow-wrap: anywhere; }
+    footer { text-align: center; padding: 25px; color: #91a2bc; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CHING Tools Translate Video .ai</h1>
+    <p>បកប្រែសំឡេង និងបង្កើតចំណងជើងរងជាភាសាដែលអ្នកចង់បាន</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>១. អាប់ឡូតវីដេអូ</h2>
+      <label for="videoFile">ជ្រើសរើសឯកសារវីដេអូ</label>
+      <input id="videoFile" type="file" accept="video/*">
+      <p id="fileInfo" class="muted">មិនទាន់មានវីដេអូទេ</p>
+      <video id="preview" controls hidden></video>
+    </section>
+
+    <section class="panel">
+      <h2>២. ជ្រើសរើសភាសា</h2>
+      <label for="sourceLang">ភាសាដើម</label>
+      <select id="sourceLang">
+        <option value="auto">រកឃើញភាសាដោយស្វ័យប្រវត្តិ</option>
+        <option value="en">អង់គ្លេស</option>
+        <option value="km">ខ្មែរ</option>
+        <option value="th">ថៃ</option>
+        <option value="zh">ចិន</option>
+        <option value="ja">ជប៉ុន</option>
+        <option value="ko">កូរ៉េ</option>
+      </select>
+
+      <label for="targetLang">បកប្រែទៅជាភាសា</label>
+      <select id="targetLang">
+        <option value="km">ខ្មែរ</option>
+        <option value="en">អង់គ្លេស</option>
+        <option value="th">ថៃ</option>
+        <option value="zh">ចិន</option>
+        <option value="ja">ជប៉ុន</option>
+        <option value="ko">កូរ៉េ</option>
+      </select>
+    </section>
+
+    <section class="panel">
+      <h2>៣. ដំណើរការបកប្រែ</h2>
+      <p class="muted">
+        ជំហាននេះត្រូវការភ្ជាប់ Backend និង Gemini API
+        មុនពេលអាចបកប្រែសំឡេងពិតប្រាកដបាន។
+      </p>
+      <button id="translateBtn" disabled>ចាប់ផ្ដើមបកប្រែ</button>
+      <p id="status" class="status" role="status">
+        សូមអាប់ឡូតវីដេអូជាមុន។
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>៤. ទាញយកលទ្ធផល</h2>
+      <p class="muted">
+        ក្រោយពេលភ្ជាប់ប្រព័ន្ធបកប្រែរួច អ្នកនឹងអាចទាញយក
+        វីដេអូ MP4 និងចំណងជើងរង SRT នៅទីនេះ។
+      </p>
+      <div id="downloads"></div>
+    </section>
+  </main>
+
+  <footer>© 2026 CHING Tools Translate Video .ai</footer>
+
+  <script>
+    const fileInput = document.getElementById('videoFile');
+    const preview = document.getElementById('preview');
+    const fileInfo = document.getElementById('fileInfo');
+    const translateBtn = document.getElementById('translateBtn');
+    const status = document.getElementById('status');
+    let previewUrl = null;
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+      preview.hidden = true;
+      translateBtn.disabled = true;
+
+      if (!file) {
+        fileInfo.textContent = 'មិនទាន់មានវីដេអូទេ';
+        status.textContent = 'សូមអាប់ឡូតវីដេអូជាមុន។';
+        return;
+      }
+
+      if (!file.type.startsWith('video/')) {
+        fileInput.value = '';
+        fileInfo.textContent = 'សូមជ្រើសរើសឯកសារវីដេអូ។';
+        return;
+      }
+
+      previewUrl = URL.createObjectURL(file);
+      preview.src = previewUrl;
+      preview.hidden = false;
+      fileInfo.textContent =
+        'ឈ្មោះ៖ ' + file.name +
+        ' | ទំហំ៖ ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+
+      preview.onloadedmetadata = () => {
+        const d = preview.duration;
+        fileInfo.textContent +=
+          ' | រយៈពេល៖ ' +
+          (Number.isFinite(d)
+            ? Math.floor(d / 60) + ' នាទី ' +
+              Math.floor(d % 60) + ' វិនាទី'
+            : 'មិនអាចអានបាន');
+
+        translateBtn.disabled = false;
+      };
+
+      status.textContent =
+        'វីដេអូរួចរាល់សម្រាប់ជំហានភ្ជាប់ Backend។';
+    });
+
+    translateBtn.addEventListener('click', () => {
+      status.textContent =
+        'មិនទាន់ភ្ជាប់ Backend ទេ។ សូមបន្ថែម API និងប្រព័ន្ធដំណើរការវីដេអូ មុនពេលបកប្រែ។';
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    });
+  </script>
+</body>
+</html>
+  
