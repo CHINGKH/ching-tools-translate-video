@@ -70,10 +70,17 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Gemini API status:", response.status);
-      return res.status(502).json({
-        error: "Gemini មិនអាចបកប្រែបានទេ។ សូមពិនិត្យ API និងកូតា។"
-      });
+  console.error(
+    "Gemini API error:",
+    response.status,
+    data.error?.message || "Unknown error"
+  );
+
+  return res.status(502).json({
+    error:
+      "Gemini API (" + response.status + "): " +
+      (data.error?.message || "Unknown error")
+  });
     }
 
     const translatedText =
