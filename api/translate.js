@@ -67,14 +67,17 @@ export default async function handler(req, res) {
       }
     );
 
-    const data = await response.json();
+    const raw = await response.text();
+let data = {};
 
-    if (!response.ok) {
-  console.error(
-    "Gemini API error:",
-    response.status,
-    data.error?.message || "Unknown error"
-  );
+try {
+  data = raw ? JSON.parse(raw) : {};
+} catch {
+  console.error("Gemini returned invalid JSON:", raw);
+  return res.status(502).json({
+    error: "Gemini បានបញ្ជូនទិន្នន័យមិនត្រឹមត្រូវ"
+  });
+}
 
   return res.status(502).json({
     error:
