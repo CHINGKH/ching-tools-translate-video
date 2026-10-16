@@ -180,5 +180,77 @@
     });
   </script>
 </body>
+<!-- CHING Tools: Text Translator -->
+<section id="ching-translator" style="max-width:700px;margin:30px auto;padding:20px;background:#171717;color:white;border-radius:16px;font-family:Arial,sans-serif;">
+  <h2>🌐 CHING AI Translator</h2>
+  <p>បញ្ចូលអត្ថបទដែលអ្នកចង់បកប្រែ</p>
+
+  <textarea id="ching-input" placeholder="វាយ ឬបិទភ្ជាប់អត្ថបទនៅទីនេះ..." style="box-sizing:border-box;width:100%;min-height:140px;padding:12px;border-radius:8px;font-size:16px;"></textarea>
+
+  <label for="ching-language">ភាសាគោលដៅ៖</label>
+  <select id="ching-language" style="display:block;width:100%;padding:12px;margin:10px 0;background:#292929;color:white;border-radius:8px;">
+    <option>Khmer</option>
+    <option>English</option>
+    <option>Thai</option>
+    <option>Chinese</option>
+    <option>Vietnamese</option>
+    <option>Japanese</option>
+    <option>Korean</option>
+    <option>French</option>
+  </select>
+
+  <button id="ching-translate" type="button" style="width:100%;padding:14px;background:#6655ee;color:white;border:0;border-radius:8px;font-size:16px;">
+    បកប្រែឥឡូវនេះ
+  </button>
+
+  <p id="ching-status" role="status"></p>
+  <textarea id="ching-result" readonly placeholder="លទ្ធផលបកប្រែនឹងបង្ហាញនៅទីនេះ..." style="box-sizing:border-box;width:100%;min-height:140px;padding:12px;border-radius:8px;font-size:16px;"></textarea>
+</section>
+
+<script>
+(function () {
+  const button = document.getElementById("ching-translate");
+  if (!button) return;
+
+  button.addEventListener("click", async function () {
+    const input = document.getElementById("ching-input").value.trim();
+    const language = document.getElementById("ching-language").value;
+    const result = document.getElementById("ching-result");
+    const status = document.getElementById("ching-status");
+
+    if (!input) {
+      status.textContent = "សូមបញ្ចូលអត្ថបទជាមុនសិន។";
+      return;
+    }
+
+    button.disabled = true;
+    status.textContent = "កំពុងបកប្រែ...";
+    result.value = "";
+
+    try {
+      const response = await fetch("/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: input,
+          sourceLanguage: "Auto",
+          targetLanguage: language
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "បកប្រែមិនបានទេ");
+
+      result.value = data.translatedText || "";
+      status.textContent = "បកប្រែរួចរាល់! ✅";
+    } catch (error) {
+      status.textContent = "មានបញ្ហា៖ " + error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
+  
 </html>
   
