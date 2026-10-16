@@ -251,6 +251,36 @@
   });
 })();
 </script>
+
+<script type="module">
+import { upload } from 'https://esm.sh/@vercel/blob/client';
+
+const videoInput = document.querySelector(
+  'input[type="file"][accept*="video"]'
+);
+
+if (videoInput) {
+  videoInput.addEventListener('change', async () => {
+    const file = videoInput.files?.[0];
+    if (!file) return;
+
+    try {
+      alert('កំពុងផ្ទុកវីដេអូ...');
+
+      const blob = await upload(file.name, file, {
+        access: 'public',
+        handleUploadUrl: '/api/upload'
+      });
+
+      alert('ផ្ទុកវីដេអូរួចរាល់!');
+      console.log('Video uploaded:', blob.pathname);
+    } catch (error) {
+      console.error(error);
+      alert('ផ្ទុកមិនបាន៖ ' + error.message);
+    }
+  });
+}
+</script>
   
 </html>
   
